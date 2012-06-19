@@ -1,0 +1,150 @@
+# vim:sw=8:ts=8:si:et
+
+This is the software for the tuxgraphics.org
+ethernet remote device. See http://tuxgraphics.org/electronics/
+
+Copyright of most software and all diagrams: Guido Socher
+Copyright of enc28j60.c/enc28j60.h Pascal Stang (http://www.procyonengineering.com/)
+          and small modifications by Guido Socher
+License for everything: GPL V2
+---------------------------------------------------------------------------
+
+ All parts needed to build this AVR ethernet solution can be ordered from 
+ http://shop.tuxgraphics.org/                                          
+ Note that the magnetics need to fit exactly the requirements of the enc28j60
+ chip. You can not just take any transformer.
+
+!! READ THIS FIRST !!
+---------------------
+! Edit the file main.c and change the 2 lines:
+! static uint8_t mymac[6] = {0x54,0x55,0x58,0x10,0x00,0x24};
+! static uint8_t myip[4] = {10,0,0,24};
+
+For the first device you build you will not need to change the mymac line.
+But you will probably need to change the IP address (myip). It must be a
+free address from the address range in your home network.
+
+There is a range of private addresses (not routed on the public internet)
+which you can use:
+Netmask          Network Addresses
+255.0.0.0         10.0.0.0 - 10.255.255.255
+255.255.0.0         172.16.0.0 - 172.31.255.255
+255.255.255.0         192.168.0.0 - 192.168.255.255
+
+Example: you wlan router might have 192.168.1.1, your PC might have
+192.168.1.2. This means you could e.g use 192.168.1.10 and leave some
+room for more PCs. If you use DHCP then make sure that the address it not
+double allocated (exclude it from the DHCP range).
+
+To compile the final software and download it to the Atmega88 use the commands:
+make
+make load
+
+You need at least avrlibc-1.4.x !! The atmega88 will not work with earilier 
+version.
+
+! Note your programmer might interfer with the enc28j60! For the avrusb500
+! with 30cm cable you can normally leave the cable on. For all other programmers
+! it is however saver to remove the programmer cable and power down/up the device.
+! This is because the SPI interface is used for loading of the software and 
+! communication to the enc28j60.
+
+To see a list of all possible build targets run the command:
+make help
+
+Loading the test software
+-------------------------
+Test of the atmega88:
+make test0
+make load_test0
+
+This will case a LED on PB1 to blink with 1Hz
+
+---------------
+Edit the file test1.c and change the lines (see description above):
+static uint8_t mymac[6] = {0x54,0x55,0x58,0x10,0x00,0x24};
+static uint8_t myip[4] = {10,0,0,24};
+
+make test1
+make load_test1
+
+The program will perform a LED test for the LEDs on the magjack.
+The LEDs will go on and off after startup and then the green LED
+should stray on indicating that the link is up. When you ping the circuit
+it will answer. The yellow LED should blink when the a packet arrives.
+The red LED on PB1 should go on/off with every ping packet.
+
+---------------
+Edit the file test1.c and change the lines (see description above):
+static uint8_t mymac[6] = {0x54,0x55,0x58,0x10,0x00,0x24};
+static uint8_t myip[4] = {10,0,0,24};
+
+make test2
+make load_test2
+
+The green LED on the magjack should go on indicating that the link is up.
+When you ping the circuit it will answer. The yellow LED should blink when 
+the a packet arrives.
+You can use the program udpcom and send the string test to the device. It will
+answer with "hello". Exmaple:
+
+./udpcom/unix/udpcom test 10.0.0.24
+
+II: data: test, ip: 10.0.0.24 port: 1200
+OK: 10.0.0.24: hello
+
+
+Using the eth_rem_dev
+---------------------
+The only supported useful function in this release is to switch on or
+of the transistor connected to PD7.
+The command to switch on is: t=1
+The command to switch off is: t=0
+Query the status: t=?
+
+The udpcom syntax is: udpcom password,X=Y IP-addr
+
+Here is an example:
+./udpcom/unix/udpcom secret,t=0 10.0.0.24
+II: data: secret,t=0, ip: 10.0.0.24 port: 1200
+OK: 10.0.0.24: t=0
+
+./udpcom/unix/udpcom secret,t=1 10.0.0.24
+II: data: secret,t=1, ip: 10.0.0.24 port: 1200
+OK: 10.0.0.24: t=1
+
+./udpcom/unix/udpcom secret,t=? 10.0.0.24
+II: data: secret,t=?, ip: 10.0.0.24 port: 1200
+OK: 10.0.0.24: t=1
+
+./udpcom/unix/udpcom secret,t=0 10.0.0.24
+II: data: secret,t=0, ip: 10.0.0.24 port: 1200
+OK: 10.0.0.24: t=0
+
+./udpcom/unix/udpcom secret,t=? 10.0.0.24
+II: data: secret,t=?, ip: 10.0.0.24 port: 1200
+OK: 10.0.0.24: t=0
+
+Messages form a Network analyser
+--------------------------------
+traffic.txt and traffic.cap are
+decoded and binary messages of the communication with the
+eth_rem_dev. This will help you to understand the code.
+
+Revision history
+----------------
+2006-05-01: version 0.9 -- Last development version
+2006-06-24: version 1.0 -- First public version
+2006-07-01: version 1.1 -- Problem fix for: Sometimes packets are not 
+                                   reported from the ENC28J60 to the uC, 
+                                   file enc28j60.c updated.
+                        -- udpcom updated to accept also host names. Apple and Windows
+                                   binaries still need to be recompiled.
+
+2008-08-03: version 1.2 -- The udp code had a bit unusual behaviour using always
+                           port 1200 to send the answer to. Most network clients
+                           do not work this way. Now we send udp ansers back to the
+                           port of the request. udpcom was update accordingly.
+                           Thanks to Lieven Merckx for suggesting the upd change.
+
+

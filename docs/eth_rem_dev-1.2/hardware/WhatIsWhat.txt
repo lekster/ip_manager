@@ -1,0 +1,9 @@
+WhatIsWhat.txt -- this file
+
+eth-remote-device.pdf -- the circuit diagram
+
+The following are files I needed during development:
+eth-remote-device.sch -- the circuit diagram in gschem format
+magjack.sym -- a gschem symbol for the magjack
+enc28j60_ph.sym -- a gschem symbol for the enc28j60
+magjack08b01x1t03_pcb_element -- a PCB element for the magjack

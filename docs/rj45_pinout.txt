@@ -1,0 +1,9 @@
+Pin 	Name 	Description
+1 	TX+ 	Transmit Data+
+2 	TX- 	Transmit Data-
+3 	RX+ 	Receive Data+
+4 	n/c 	Not connected
+5 	n/c 	Not connected
+6 	RX- 	Receive Data-
+7 	n/c 	Not connected
+8 	n/c 	Not connected
